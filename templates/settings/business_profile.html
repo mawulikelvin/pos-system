@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Business Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Business Profile</h1>
+        <p class="text-gray-600 mt-2">Configure your business information and branding</p>
+    </div>
+
+    <!-- Settings Navigation -->
+    <div class="mb-8">
+        <nav class="flex space-x-8 border-b border-gray-200">
+            <a href="{{ url_for('settings.business_profile') }}" 
+               class="py-2 px-1 border-b-2 border-blue-500 text-sm font-medium text-blue-600">
+                Business Profile
+            </a>
+            <a href="{{ url_for('settings.system_settings') }}" 
+               class="py-2 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                System Settings
+            </a>
+            <a href="{{ url_for('settings.backup') }}" 
+               class="py-2 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Backup & Restore
+            </a>
+        </nav>
+    </div>
+
+<div class="space-y-6">
+
+    <div class="bg-white shadow rounded-lg">
+        <form method="POST" enctype="multipart/form-data" class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Business Name -->
+                <div class="md:col-span-2">
+                    <label for="business_name" class="block text-sm font-bold text-gray-700 mb-2">
+                        Business Name *
+                    </label>
+                    <input type="text" id="business_name" name="business_name" 
+                           value="{{ settings.business_name if settings else '' }}" required
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <!-- Tax Rate -->
+                <div>
+                    <label for="tax_rate" class="block text-sm font-bold text-gray-700 mb-2">
+                        Tax Rate (%) *
+                    </label>
+                    <input type="number" id="tax_rate" name="tax_rate" step="0.01" min="0" max="100"
+                           value="{{ settings.tax_rate if settings else 5.0 }}" required
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Enter tax rate as percentage (e.g., 5.0 for 5%)</p>
+                </div>
+                
+                <!-- Currency -->
+                <div>
+                    <label for="currency" class="block text-sm font-bold text-gray-700 mb-2">
+                        Currency *
+                    </label>
+                    <select id="currency" name="currency" required
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="GHS" {% if not settings or settings.currency == 'GHS' %}selected{% endif %}>
+                            Ghana Cedis (GH₵)
+                        </option>
+                        <option value="USD" {% if settings and settings.currency == 'USD' %}selected{% endif %}>
+                            US Dollar ($)
+                        </option>
+                        <option value="EUR" {% if settings and settings.currency == 'EUR' %}selected{% endif %}>
+                            Euro (€)
+                        </option>
+                        <option value="GBP" {% if settings and settings.currency == 'GBP' %}selected{% endif %}>
+                            British Pound (£)
+                        </option>
+                    </select>
+                </div>
+                
+                <!-- Address -->
+                <div class="md:col-span-2">
+                    <label for="address" class="block text-sm font-bold text-gray-700 mb-2">
+                        Business Address
+                    </label>
+                    <textarea id="address" name="address" rows="3"
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Enter your business address">{{ settings.address if settings else '' }}</textarea>
+                </div>
+                
+                <!-- Contact Information -->
+                <div>
+                    <label for="contact" class="block text-sm font-bold text-gray-700 mb-2">
+                        Contact Number
+                    </label>
+                    <input type="tel" id="contact" name="contact" 
+                           value="{{ settings.contact if settings else '' }}"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="+233 XX XXX XXXX">
+                </div>
+                
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-bold text-gray-700 mb-2">
+                        Business Email
+                    </label>
+                    <input type="email" id="contact_email" name="contact_email" 
+                           value="{{ settings.contact_email if settings else '' }}"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="business@example.com">
+                </div>
+                
+                <!-- Logo Upload -->
+                <div class="md:col-span-2">
+                    <label for="logo" class="block text-sm font-bold text-gray-700 mb-2">
+                        Business Logo
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        {% if settings and settings.logo_path %}
+                        <div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <img src="{{ url_for('static', filename=settings.logo_path) }}" 
+                                 alt="Business Logo" class="w-16 h-16 object-contain">
+                        </div>
+                        {% else %}
+                        <div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-2xl"></i>
+                        </div>
+                        {% endif %}
+                        <input type="file" id="logo" name="logo" accept="image/*"
+                               class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1">Upload a logo image (PNG, JPG, GIF). Max size: 5MB</p>
+                </div>
+                
+                <!-- Business Hours -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Business Hours
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="opening_time" class="block text-sm text-gray-600 mb-1">Opening Time</label>
+                            <input type="time" id="opening_time" name="opening_time" 
+                                   value="{{ settings.opening_time if settings else '08:00' }}"
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="closing_time" class="block text-sm text-gray-600 mb-1">Closing Time</label>
+                            <input type="time" id="closing_time" name="closing_time" 
+                                   value="{{ settings.closing_time if settings else '18:00' }}"
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="mt-8 flex items-center justify-end space-x-3">
+                <button type="button" onclick="history.back()" 
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- System Information -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 class="text-lg font-medium text-blue-900 mb-4">
+            <i class="fas fa-info-circle mr-2"></i>System Information
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+            <div>
+                <p><strong>Default Currency:</strong> Ghana Cedis (GH₵)</p>
+                <p><strong>Tax System:</strong> VAT/GST Support</p>
+                <p><strong>Language:</strong> English</p>
+            </div>
+            <div>
+                <p><strong>Timezone:</strong> GMT+0 (Ghana)</p>
+                <p><strong>Date Format:</strong> DD/MM/YYYY</p>
+                <p><strong>Decimal Places:</strong> 2 (for currency)</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

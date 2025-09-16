@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Email Configuration Test{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">Email Configuration Test</h1>
+            <a href="{{ url_for('settings.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Back to Settings
+            </a>
+        </div>
+
+        <div class="mb-6">
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Email Configuration Status</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            {% if config.MAIL_USERNAME %}
+                                <p class="text-green-600">✓ Email is configured ({{ config.MAIL_USERNAME }})</p>
+                                <p>Server: {{ config.MAIL_SERVER }}:{{ config.MAIL_PORT }}</p>
+                                <p>TLS: {{ 'Enabled' if config.MAIL_USE_TLS else 'Disabled' }}</p>
+                            {% else %}
+                                <p class="text-red-600">✗ Email is not configured</p>
+                                <p>Please set up email environment variables to enable email functionality.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if config.MAIL_USERNAME %}
+        <div class="mb-6">
+            <form method="POST" action="{{ url_for('settings.test_email') }}">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Send Test Email</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Click the button below to send a test email to verify your email configuration is working correctly.
+                    </p>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Send Test Email
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Email Configuration Instructions</h3>
+            <div class="text-sm text-gray-600 space-y-2">
+                <p><strong>For Gmail:</strong></p>
+                <ol class="list-decimal list-inside space-y-1 ml-4">
+                    <li>Enable 2-factor authentication on your Gmail account</li>
+                    <li>Generate an App Password (not your regular password)</li>
+                    <li>Set environment variables:</li>
+                </ol>
+                <div class="bg-gray-100 p-3 rounded mt-2 font-mono text-xs">
+                    MAIL_SERVER=smtp.gmail.com<br>
+                    MAIL_PORT=587<br>
+                    MAIL_USE_TLS=True<br>
+                    MAIL_USERNAME=your-email@gmail.com<br>
+                    MAIL_PASSWORD=your-app-password<br>
+                    MAIL_DEFAULT_SENDER=your-email@gmail.com
+                </div>
+                
+                <p class="mt-4"><strong>For other email providers:</strong></p>
+                <p>Update the MAIL_SERVER and MAIL_PORT accordingly. Common settings:</p>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li>Outlook: smtp-mail.outlook.com:587</li>
+                    <li>Yahoo: smtp.mail.yahoo.com:587</li>
+                    <li>Custom SMTP: Contact your email provider</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

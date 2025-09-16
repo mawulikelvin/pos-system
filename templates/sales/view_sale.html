@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Sale Details - POS System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Sale Details</h1>
+                <p class="text-gray-600">View complete information for Sale #{{ sale.id }}</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ url_for('sales.sales_history') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Sales History
+                </a>
+                <a href="{{ url_for('sales.receipt', sale_id=sale.id) }}" 
+                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    <i class="fas fa-receipt mr-2"></i>
+                    View Receipt
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Sale Information -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <!-- Sale Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold">Sale #{{ sale.id }}</h2>
+                            <p class="text-blue-100 text-sm">{{ sale.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold">GH₵{{ "%.2f"|format(sale.total_amount) }}</div>
+                            <div class="text-blue-100 text-sm">Total Amount</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sale Details -->
+                <div class="p-6">
+                    <!-- Basic Information -->
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Sale ID:</span>
+                                <span class="font-mono font-bold">#{{ sale.id }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Date & Time:</span>
+                                <span>{{ sale.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Cashier:</span>
+                                <span>{{ sale.cashier.username }}</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Payment Method:</span>
+                                <dd class="text-sm text-gray-900">{{ sale.payment_method.replace('_', ' ').title() }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Status:</span>
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">
+                                    {{ sale.status|title }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-600">Receipt Number:</span>
+                                <span class="font-mono">{{ sale.receipt.receipt_number }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Information (if available) -->
+                    {% if sale.customer %}
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <h3 class="font-medium text-gray-900 mb-3 flex items-center">
+                            <i class="fas fa-user mr-2 text-blue-600"></i>
+                            Customer Information
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-600">Name:</span>
+                                <span class="ml-2 font-medium">{{ sale.customer.name }}</span>
+                            </div>
+                            {% if sale.customer.phone %}
+                            <div>
+                                <span class="text-gray-600">Phone:</span>
+                                <span class="ml-2 font-medium">{{ sale.customer.phone }}</span>
+                            </div>
+                            {% endif %}
+                            {% if sale.customer.email %}
+                            <div>
+                                <span class="text-gray-600">Email:</span>
+                                <span class="ml-2 font-medium">{{ sale.customer.email }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Items Purchased -->
+                    <div class="mb-6">
+                        <h3 class="font-medium text-gray-900 mb-3 flex items-center">
+                            <i class="fas fa-shopping-cart mr-2 text-blue-600"></i>
+                            Items Purchased
+                        </h3>
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                                <div class="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700">
+                                    <div class="col-span-6">Product</div>
+                                    <div class="col-span-2 text-center">Qty</div>
+                                    <div class="col-span-2 text-right">Unit Price</div>
+                                    <div class="col-span-2 text-right">Total</div>
+                                </div>
+                            </div>
+                            <div class="divide-y divide-gray-200">
+                                {% for item in sale.items %}
+                                <div class="px-4 py-3 hover:bg-gray-50">
+                                    <div class="grid grid-cols-12 gap-4 items-center">
+                                        <div class="col-span-6">
+                                            <div class="font-medium text-gray-900">{{ item.product.name }}</div>
+                                            <div class="text-sm text-gray-500">{{ item.product.sku }}</div>
+                                        </div>
+                                        <div class="col-span-2 text-center text-gray-700">{{ item.quantity }}</div>
+                                        <div class="col-span-2 text-right text-gray-700">GH₵{{ "%.2f"|format(item.unit_price) }}</div>
+                                        <div class="col-span-2 text-right font-medium text-gray-900">GH₵{{ "%.2f"|format(item.total_price) }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Summary -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-medium text-gray-900 mb-3">Payment Summary</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Subtotal:</span>
+                                <span class="font-medium">GH₵{{ "%.2f"|format(sale.total_amount + sale.discount_amount) }}</span>
+                            </div>
+                            {% if sale.discount_amount > 0 %}
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Discount Applied:</span>
+                                <span class="text-green-600 font-medium">-GH₵{{ "%.2f"|format(sale.discount_amount) }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="flex justify-between text-lg font-bold border-t border-gray-300 pt-2">
+                                <span>Total Amount:</span>
+                                <span class="text-blue-600">GH₵{{ "%.2f"|format(sale.total_amount) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Panel -->
+        <div class="space-y-4">
+            <!-- Quick Actions -->
+            <div class="bg-white shadow-lg rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                <div class="space-y-3">
+                    <a href="{{ url_for('sales.receipt', sale_id=sale.id) }}" 
+                       class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-receipt mr-2"></i>
+                        View Receipt
+                    </a>
+                    <a href="{{ url_for('sales.download_receipt', sale_id=sale.id) }}" 
+                       class="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Download PDF
+                    </a>
+                    <button onclick="showEmailModal()" 
+                       class="w-full flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                        <i class="fas fa-envelope mr-2"></i>
+                        Email Receipt
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Sale Statistics -->
+            <div class="bg-white shadow-lg rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Sale Statistics</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Items Sold:</span>
+                        <span class="font-medium">{{ sale.items|length }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Quantity:</span>
+                        <span class="font-medium">{{ sale.items|sum(attribute='quantity') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Payment Status:</span>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
+                            Paid
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Sale Age:</span>
+                        <span class="font-medium">{{ sale_age }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div id="emailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Email Receipt</h3>
+                <button onclick="hideEmailModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="emailForm" method="POST" action="{{ url_for('sales.email_receipt', sale_id=sale.id) }}">
+                <div class="mb-4">
+                    <label for="recipient_email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Recipient Email Address
+                    </label>
+                    <input type="email" 
+                           id="recipient_email" 
+                           name="recipient_email" 
+                           {% if sale.customer and sale.customer.email %}value="{{ sale.customer.email }}"{% endif %}
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Enter email address"
+                           required>
+                </div>
+                <div class="mb-4">
+                    <label for="email_message" class="block text-sm font-medium text-gray-700 mb-2">
+                        Message (Optional)
+                    </label>
+                    <textarea id="email_message" 
+                              name="email_message" 
+                              rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Add a personal message..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" 
+                            onclick="hideEmailModal()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showEmailModal() {
+    document.getElementById('emailModal').classList.remove('hidden');
+    document.getElementById('recipient_email').focus();
+}
+
+function hideEmailModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+    document.getElementById('emailForm').reset();
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.target === modal) {
+        hideEmailModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        hideEmailModal();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Sale Details page loaded');
+});
+</script>
+{% endblock %}

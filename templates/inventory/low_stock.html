@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Low Stock Alert{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">Low Stock Alert</h1>
+        <a href="{{ url_for('inventory.products') }}" 
+           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            View All Products
+        </a>
+    </div>
+
+    {% if products %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200">
+            {% for product in products %}
+            <li>
+                <div class="px-4 py-4 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                            <div class="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <div class="flex items-center">
+                                <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                                <div class="ml-2 flex-shrink-0 flex">
+                                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Low Stock
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                SKU: {{ product.sku }} | Category: {{ product.category or 'N/A' }}
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                Current Stock: <span class="font-semibold text-red-600">{{ product.stock_quantity }}</span> | 
+                                Alert Threshold: {{ product.low_stock_threshold }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ url_for('inventory.edit_product', product_id=product.id) }}" 
+                           class="text-blue-600 hover:text-blue-900">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="{{ url_for('inventory.create_stock_adjustment', product_id=product.id) }}" 
+                           class="text-green-600 hover:text-green-900">
+                            <i class="fas fa-plus"></i> Restock
+                        </a>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <div class="max-w-sm mx-auto">
+            <div class="flex justify-center">
+                <i class="fas fa-check-circle text-green-500 text-6xl"></i>
+            </div>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">All products are well stocked!</h3>
+            <p class="mt-1 text-sm text-gray-500">No products are currently below their low stock threshold.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

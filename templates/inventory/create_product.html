@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Create Product{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">Create New Product</h1>
+        </div>
+        
+        <form method="POST" class="px-6 py-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Product Name -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Product Name *</label>
+                    <input type="text" id="name" name="name" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <!-- SKU -->
+                <div>
+                    <label for="sku" class="block text-sm font-medium text-gray-700">SKU *</label>
+                    <input type="text" id="sku" name="sku" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <!-- Barcode -->
+                <div>
+                    <label for="barcode" class="block text-sm font-medium text-gray-700">Barcode</label>
+                    <input type="text" id="barcode" name="barcode"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <!-- Category -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                    <input type="text" id="category" name="category"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <!-- Supplier -->
+                <div>
+                    <label for="supplier_id" class="block text-sm font-medium text-gray-700">Supplier</label>
+                    <select id="supplier_id" name="supplier_id"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Select Supplier</option>
+                        {% for supplier in suppliers %}
+                        <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Price -->
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-700">Selling Price *</label>
+                    <input type="number" id="price" name="price" step="0.01" min="0" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <!-- Cost Price -->
+                <div>
+                    <label for="cost_price" class="block text-sm font-medium text-gray-700">Cost Price</label>
+                    <input type="number" id="cost_price" name="cost_price" step="0.01" min="0"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <!-- Stock Quantity -->
+                <div>
+                    <label for="stock_quantity" class="block text-sm font-medium text-gray-700">Initial Stock</label>
+                    <input type="number" id="stock_quantity" name="stock_quantity" min="0" value="0"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                
+                <!-- Low Stock Threshold -->
+                <div>
+                    <label for="low_stock_threshold" class="block text-sm font-medium text-gray-700">Low Stock Alert</label>
+                    <input type="number" id="low_stock_threshold" name="low_stock_threshold" min="0" value="5"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="mt-6 flex items-center justify-end space-x-3">
+                <a href="{{ url_for('inventory.products') }}" 
+                   class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Create Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

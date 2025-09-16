@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Supplier - POS System{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-blue-600 text-white px-6 py-4">
+            <h1 class="text-2xl font-bold">Edit Supplier</h1>
+        </div>
+        
+        <form method="POST" class="p-6 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Supplier Name -->
+                <div class="md:col-span-2">
+                    <label for="name" class="block text-sm font-bold text-gray-700 mb-2">Supplier Name *</label>
+                    <input type="text" id="name" name="name" value="{{ supplier.name }}" required
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Enter supplier name">
+                </div>
+                
+                <!-- Contact Person -->
+                <div>
+                    <label for="contact_person" class="block text-sm font-bold text-gray-700 mb-2">Contact Person</label>
+                    <input type="text" id="contact_person" name="contact_person" value="{{ supplier.contact_person or '' }}"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Contact person name">
+                </div>
+                
+                <!-- Phone Number -->
+                <div>
+                    <label for="phone" class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="{{ supplier.phone or '' }}"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="+233 XX XXX XXXX">
+                </div>
+                
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ supplier.email or '' }}"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="supplier@example.com">
+                </div>
+                
+                <!-- Address -->
+                <div class="md:col-span-2">
+                    <label for="address" class="block text-sm font-bold text-gray-700 mb-2">Address</label>
+                    <textarea id="address" name="address" rows="3"
+                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Enter supplier address">{{ supplier.address or '' }}</textarea>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+                <a href="{{ url_for('inventory.suppliers') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-save mr-2"></i>
+                    Update Supplier
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Edit Supplier page loaded');
+    
+    // Phone number formatting for Ghana
+    const phoneInput = document.getElementById('phone');
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.startsWith('233')) {
+            value = '+' + value;
+        } else if (value.startsWith('0')) {
+            value = '+233' + value.substring(1);
+        } else if (value.length > 0 && !value.startsWith('+')) {
+            value = '+233' + value;
+        }
+        e.target.value = value;
+    });
+});
+</script>
+{% endblock %}

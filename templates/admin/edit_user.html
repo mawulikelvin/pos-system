@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - Admin - POS System{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Edit User</h1>
+                <p class="text-gray-600">Modify user information and settings</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ url_for('admin.users') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Users
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Form -->
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-blue-600 text-white px-6 py-4">
+            <h2 class="text-xl font-bold">Edit User: {{ user.username }}</h2>
+        </div>
+        
+        <form method="POST" class="p-6 space-y-6">
+            <!-- Username (Read-only) -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                    Username
+                </label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       value="{{ user.username }}"
+                       readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500">
+                <p class="mt-1 text-sm text-gray-500">Username cannot be changed for security reasons.</p>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address <span class="text-red-500">*</span>
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       value="{{ user.email }}"
+                       required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Enter email address">
+                <p class="mt-1 text-sm text-gray-500">Email must be unique and will be used for password recovery.</p>
+            </div>
+
+            <!-- Password (Optional) -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                    New Password
+                </label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       minlength="6"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Leave blank to keep current password">
+                <p class="mt-1 text-sm text-gray-500">Leave blank if you don't want to change the password. Must be at least 6 characters if provided.</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+                <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm New Password
+                </label>
+                <input type="password" 
+                       id="confirm_password" 
+                       name="confirm_password" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Confirm new password">
+                <p class="mt-1 text-sm text-gray-500">Please confirm the new password if you're changing it.</p>
+            </div>
+
+            <!-- Role -->
+            <div>
+                <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                    User Role <span class="text-red-500">*</span>
+                </label>
+                <select id="role" 
+                        name="role" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Administrator</option>
+                    <option value="cashier" {% if user.role == 'cashier' %}selected{% endif %}>Cashier</option>
+                    <option value="staff" {% if user.role == 'staff' %}selected{% endif %}>Staff</option>
+                </select>
+                <div class="mt-2 space-y-2 text-sm text-gray-600">
+                    <div class="flex items-start">
+                        <i class="fas fa-shield-alt text-red-500 mt-1 mr-2"></i>
+                        <div>
+                            <span class="font-medium text-red-700">Administrator:</span> Full system access, user management, settings
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-cash-register text-blue-500 mt-1 mr-2"></i>
+                        <div>
+                            <span class="font-medium text-blue-700">Cashier:</span> POS operations, sales, inventory viewing
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-user-tie text-green-500 mt-1 mr-2"></i>
+                        <div>
+                            <span class="font-medium text-green-700">Staff:</span> Basic operations, limited access
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Status -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-3">User Status</h3>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Account Status:</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                   {% if user.is_active %}bg-green-100 text-green-800
+                                   {% else %}bg-red-100 text-red-800{% endif %}">
+                            {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Created:</span>
+                        <span class="text-sm text-gray-900">{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </div>
+                    {% if user.last_login %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Last Login:</span>
+                        <span class="text-sm text-gray-900">{{ user.last_login.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                <a href="{{ url_for('admin.users') }}" 
+                   class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-save mr-2"></i>
+                    Update User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const form = document.querySelector('form');
+    
+    // Password confirmation validation (only if password is being changed)
+    function validatePassword() {
+        if (password.value && password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+    
+    password.addEventListener('change', validatePassword);
+    confirmPassword.addEventListener('keyup', validatePassword);
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        if (password.value && password.value !== confirmPassword.value) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

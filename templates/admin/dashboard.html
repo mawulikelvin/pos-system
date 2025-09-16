@@ -1,0 +1,483 @@
+{% extends "base.html" %}
+
+{% block title %}{% if business_settings and business_settings.business_name %}{{ business_settings.business_name }} - Admin Dashboard{% else %}Admin Dashboard - POS System{% endif %}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">
+                {% if business_settings and business_settings.business_name %}
+                    {{ business_settings.business_name }}
+                {% else %}
+                    Admin Dashboard
+                {% endif %}
+            </h1>
+            <p class="text-gray-600">Overview of your business performance</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{{ url_for('reports.dashboard') }}" 
+               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <i class="fas fa-chart-bar mr-2"></i>
+                View Reports
+            </a>
+            <a href="{{ url_for('inventory.products') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i>
+                Add Product
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-users text-white"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ total_users }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-box text-white"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Products</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ total_products }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-shopping-cart text-white"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Sales</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ total_sales }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                            <i class="fas fa-user-friends text-white"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Customers</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ total_customers }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+            <p class="text-sm text-gray-600">Common tasks and navigation shortcuts</p>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="{{ url_for('sales.pos') }}" 
+                   class="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                    <i class="fas fa-cash-register text-2xl text-blue-600 mb-2"></i>
+                    <span class="text-sm font-medium text-blue-900">POS Terminal</span>
+                    <span class="text-xs text-blue-600">Start a sale</span>
+                </a>
+                
+                <a href="{{ url_for('inventory.products') }}" 
+                   class="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                    <i class="fas fa-box text-2xl text-green-600 mb-2"></i>
+                    <span class="text-sm font-medium text-green-900">Products</span>
+                    <span class="text-xs text-green-600">Manage inventory</span>
+                </a>
+                
+                <a href="{{ url_for('customers.customers') }}" 
+                   class="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                    <i class="fas fa-user-friends text-2xl text-purple-600 mb-2"></i>
+                    <span class="text-sm font-medium text-purple-900">Customers</span>
+                    <span class="text-xs text-purple-600">View customer list</span>
+                </a>
+                
+                <a href="{{ url_for('reports.dashboard') }}" 
+                   class="flex flex-col items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
+                    <i class="fas fa-chart-bar text-2xl text-yellow-600 mb-2"></i>
+                    <span class="text-sm font-medium text-yellow-900">Reports</span>
+                    <span class="text-xs text-yellow-600">View analytics</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Information -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-medium text-blue-900">
+                    <i class="fas fa-coins mr-2"></i>Business Information
+                </h3>
+                <p class="text-sm text-blue-700 mt-1">System configuration and currency settings</p>
+            </div>
+            <a href="{{ url_for('settings.business_profile') }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                <i class="fas fa-cog mr-2"></i>Configure
+            </a>
+        </div>
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-coins text-green-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Currency</p>
+                        <p class="text-lg font-bold text-green-600">Ghana Cedis (GH₵)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-percentage text-blue-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Tax Rate</p>
+                        <p class="text-lg font-bold text-blue-600">5.0%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-purple-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Business Hours</p>
+                        <p class="text-lg font-bold text-purple-600">8:00 AM - 6:00 PM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Sales Chart -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Sales Trend (Last 7 Days)</h3>
+            <div class="relative" style="height: 300px;">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Sales -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Recent Sales</h3>
+                <a href="{{ url_for('sales.sales_history') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                    View All
+                </a>
+            </div>
+            <div class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar" id="recentSalesContainer">
+                {% for sale in recent_sales %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div>
+                        <p class="font-medium text-sm">Sale #{{ sale.id }}</p>
+                        <p class="text-xs text-gray-500">{{ sale.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-blue-600">GH₵{{ "%.2f"|format(sale.total_amount) }}</p>
+                        <p class="text-xs text-gray-500">{{ sale.payment_method.replace('_', ' ').title() }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if recent_sales|length == 0 %}
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                    <p>No recent sales</p>
+                </div>
+                {% endif %}
+            </div>
+            {% if recent_sales|length > 8 %}
+            <div class="mt-3 text-center">
+                <p class="text-xs text-gray-500">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    Scroll to see more sales ({{ recent_sales|length }} total)
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions and Alerts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Low Stock Alerts -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Low Stock Alerts</h3>
+                <a href="{{ url_for('inventory.low_stock') }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                    View All
+                </a>
+            </div>
+            <div class="space-y-3">
+                {% for product in low_stock_products %}
+                <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div>
+                        <p class="font-medium text-sm text-red-900">{{ product.name }}</p>
+                        <p class="text-xs text-red-600">SKU: {{ product.sku }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-red-600">{{ product.stock_quantity }}</p>
+                        <p class="text-xs text-red-600">Threshold: {{ product.low_stock_threshold }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if low_stock_products|length == 0 %}
+                <div class="text-center text-gray-500 py-4">
+                    <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                    <p>All products are well stocked</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Recent Activities</h3>
+                <button onclick="clearAllActivities()" 
+                        class="text-red-600 hover:text-red-800 text-sm font-medium">
+                    <i class="fas fa-trash mr-1"></i>
+                    Clear All
+                </button>
+            </div>
+            <div class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar" id="activitiesContainer">
+                {% for activity in recent_activities %}
+                <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900">{{ activity.user.username }}</p>
+                        <p class="text-xs text-gray-500">{{ activity.action }}</p>
+                        <p class="text-xs text-gray-400">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if recent_activities|length == 0 %}
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-clipboard-list text-4xl mb-2"></i>
+                    <p>No recent activities</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if recent_activities|length > 8 %}
+            <div class="mt-3 text-center">
+                <p class="text-xs text-gray-500">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    Scroll to see more activities ({{ recent_activities|length }} total)
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Access Buttons -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Access</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{{ url_for('admin.users') }}" 
+               class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <i class="fas fa-users text-2xl text-blue-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Manage Users</span>
+            </a>
+            
+            <a href="{{ url_for('inventory.products') }}" 
+               class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <i class="fas fa-box text-2xl text-green-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Manage Products</span>
+            </a>
+            
+            <a href="{{ url_for('customers.customers') }}" 
+               class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <i class="fas fa-user-friends text-2xl text-purple-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Manage Customers</span>
+            </a>
+            
+            <a href="{{ url_for('settings.business_profile') }}" 
+               class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <i class="fas fa-cog text-2xl text-gray-600 mb-2"></i>
+                <span class="text-sm font-medium text-gray-900">Settings</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Sales Chart
+const ctx = document.getElementById('salesChart').getContext('2d');
+const salesData = {{ sales_data|tojson }};
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: salesData.map(item => item.date),
+        datasets: [{
+            label: 'Sales Count',
+            data: salesData.map(item => item.sales),
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.1,
+            fill: true,
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1
+            }
+        },
+        scales: {
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 0
+                }
+            },
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                    stepSize: 1,
+                    callback: function(value) {
+                        return value + ' sales';
+                    }
+                }
+            }
+        },
+        interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+        },
+        elements: {
+            point: {
+                hoverRadius: 6
+            }
+        }
+    }
+});
+
+function clearAllActivities() {
+    if (confirm('Are you sure you want to clear all recent activities? This action cannot be undone.')) {
+        fetch('{{ url_for("admin.clear_activities") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('All recent activities have been cleared.');
+                // Reload the page to show updated activities
+                window.location.reload();
+            } else {
+                alert('Failed to clear activities: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error clearing activities:', error);
+            alert('An error occurred while clearing activities.');
+        });
+    }
+}
+</script>
+
+<style>
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+</style>
+{% endblock %}

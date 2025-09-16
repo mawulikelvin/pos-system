@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}POS - Point of Sale{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-screen">
+    <!-- Left Panel - Product Search and Selection -->
+    <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border p-6">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Point of Sale</h2>
+            
+            <!-- Product Search -->
+            <div class="relative">
+                <input type="text" id="productSearch" 
+                       class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                       placeholder="Search products by name, SKU, or barcode...">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+            </div>
+            
+            <!-- Search Results -->
+            <div id="searchResults" class="mt-4 hidden">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Search Results</h3>
+                    <div id="searchResultsList" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Product Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for product in products[:12] %}
+            <div class="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                 onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }}, 1)">
+                <div class="text-center">
+                    <div class="w-12 h-12 mx-auto mb-2 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-box text-blue-600"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-900 truncate">{{ product.name }}</h3>
+                    <p class="text-xs text-gray-500">{{ product.sku }}</p>
+                    <p class="text-lg font-bold text-blue-600">{{ "%.2f"|format(product.price) }}</p>
+                    <p class="text-xs text-gray-500">Stock: {{ product.stock_quantity }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Right Panel - Cart and Checkout -->
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Shopping Cart</h3>
+            <button onclick="clearCart()" class="text-red-600 hover:text-red-800 text-sm">
+                <i class="fas fa-trash mr-1"></i>Clear
+            </button>
+        </div>
+        
+        <!-- Cart Items -->
+        <div id="cartItems" class="space-y-3 mb-6">
+            <div class="text-center text-gray-500 py-8">
+                <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                <p>Cart is empty</p>
+                <p class="text-sm">Search and add products to get started</p>
+            </div>
+        </div>
+        
+        <!-- Cart Summary -->
+        <div class="border-t pt-4 space-y-3">
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Subtotal:</span>
+                <span id="subtotal" class="font-medium">0.00</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Tax:</span>
+                <span id="tax" class="font-medium">0.00</span>
+            </div>
+            <div class="flex justify-between text-lg font-bold">
+                <span>Total:</span>
+                <span id="total" class="text-blue-600">0.00</span>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="mt-6 space-y-3">
+            <button onclick="holdSale()" 
+                    class="w-full py-3 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                <i class="fas fa-pause mr-2"></i>Hold Sale
+            </button>
+            <button onclick="window.location.href='{{ url_for('sales.checkout') }}'" 
+                    id="checkoutBtn"
+                    class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                <i class="fas fa-credit-card mr-2"></i>Checkout
+            </button>
+        </div>
+        
+        <!-- Held Sales -->
+        <div class="mt-6 pt-4 border-t">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-medium text-gray-700">Held Sales</h4>
+                <button onclick="clearAllHeldSales()" 
+                        class="text-red-600 hover:text-red-800 text-xs">
+                    <i class="fas fa-trash mr-1"></i>Clear All
+                </button>
+            </div>
+            <div id="heldSales" class="space-y-2">
+                <!-- Held sales will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let cart = [];
+
+// Product search functionality
+document.getElementById('productSearch').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    if (query.length >= 2) {
+        searchProducts(query);
+    } else {
+        document.getElementById('searchResults').classList.add('hidden');
+    }
+});
+
+async function searchProducts(query) {
+    try {
+        const response = await fetch(`/sales/api/products/search?q=${encodeURIComponent(query)}`);
+        const products = await response.json();
+        displaySearchResults(products);
+    } catch (error) {
+        console.error('Error searching products:', error);
+    }
+}
+
+function displaySearchResults(products) {
+    const container = document.getElementById('searchResultsList');
+    const resultsDiv = document.getElementById('searchResults');
+    
+    if (products.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No products found</p>';
+    } else {
+        container.innerHTML = products.map(product => `
+            <div class="flex items-center justify-between p-2 bg-white rounded border cursor-pointer hover:bg-gray-50"
+                 onclick="addToCart(${product.id}, '${product.name}', ${product.price}, 1)">
+                <div>
+                    <p class="font-medium text-sm">${product.name}</p>
+                    <p class="text-xs text-gray-500">${product.sku} | Stock: ${product.stock}</p>
+                </div>
+                <p class="font-bold text-blue-600">${product.price.toFixed(2)}</p>
+            </div>
+        `).join('');
+    }
+    
+    resultsDiv.classList.remove('hidden');
+}
+
+function addToCart(productId, name, price, quantity = 1) {
+    // Check if product already in cart
+    const existingItem = cart.find(item => item.product_id === productId);
+    
+    if (existingItem) {
+        existingItem.quantity += quantity;
+        existingItem.total = existingItem.quantity * existingItem.price;
+    } else {
+        cart.push({
+            product_id: productId,
+            name: name,
+            price: price,
+            quantity: quantity,
+            total: price * quantity
+        });
+    }
+    
+    // Sync cart with server session
+    syncCartWithServer();
+    
+    updateCartDisplay();
+    updateCheckoutButton();
+    
+    // Hide search results
+    document.getElementById('searchResults').classList.add('hidden');
+    document.getElementById('productSearch').value = '';
+}
+
+function updateCartDisplay() {
+    const container = document.getElementById('cartItems');
+    
+    if (cart.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 py-8">
+                <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                <p>Cart is empty</p>
+                <p class="text-sm">Search and add products to get started</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = cart.map(item => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex-1">
+                <h4 class="font-medium text-sm">${item.name}</h4>
+                <p class="text-xs text-gray-500">${item.price.toFixed(2)} each</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="updateQuantity(${item.product_id}, ${item.quantity - 1})" 
+                        class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-sm hover:bg-gray-300">
+                    -
+                </button>
+                <span class="w-8 text-center text-sm">${item.quantity}</span>
+                <button onclick="updateQuantity(${item.product_id}, ${item.quantity + 1})" 
+                        class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-sm hover:bg-gray-300">
+                    +
+                </button>
+                <span class="font-medium text-sm w-16 text-right">${item.total.toFixed(2)}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    updateTotals();
+}
+
+function updateQuantity(productId, newQuantity) {
+    if (newQuantity <= 0) {
+        cart = cart.filter(item => item.product_id !== productId);
+    } else {
+        const item = cart.find(item => item.product_id === productId);
+        if (item) {
+            item.quantity = newQuantity;
+            item.total = item.price * newQuantity;
+        }
+    }
+    
+    // Sync cart with server session
+    syncCartWithServer();
+    
+    updateCartDisplay();
+    updateCheckoutButton();
+}
+
+function updateTotals() {
+    const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+    const tax = subtotal * 0.05; // 5% tax
+    const total = subtotal + tax;
+    
+    document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+    document.getElementById('tax').textContent = tax.toFixed(2);
+    document.getElementById('total').textContent = total.toFixed(2);
+}
+
+function updateCheckoutButton() {
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    checkoutBtn.disabled = cart.length === 0;
+}
+
+function clearCart() {
+    cart = [];
+    
+    // Clear cart from server session
+    fetch('/sales/api/cart/clear', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+    
+    updateCartDisplay();
+    updateCheckoutButton();
+}
+
+// Function to sync cart with server session
+function syncCartWithServer() {
+    fetch('/sales/api/cart/sync', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cart: cart })
+    });
+}
+
+// Function to load cart from server session on page load
+function loadCartFromServer() {
+    fetch('/sales/api/cart')
+        .then(response => response.json())
+        .then(data => {
+            if (data.cart && data.cart.length > 0) {
+                cart = data.cart;
+                updateCartDisplay();
+                updateCheckoutButton();
+            }
+        })
+        .catch(error => console.error('Error loading cart:', error));
+}
+
+function holdSale() {
+    if (cart.length === 0) return;
+    
+    // Use server-side hold functionality
+    window.location.href = '{{ url_for("sales.hold_sale") }}';
+}
+
+function resumeSale(holdId) {
+    // Use server-side resume functionality
+    window.location.href = `{{ url_for("sales.pos") }}resume-sale/${holdId}`;
+}
+
+function updateHeldSalesDisplay() {
+    const container = document.getElementById('heldSales');
+    
+    // Load held sales from server
+    fetch('/sales/api/held-sales')
+        .then(response => response.json())
+        .then(data => {
+            const heldSales = data.held_sales || {};
+            
+            if (Object.keys(heldSales).length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">No held sales</p>';
+                return;
+            }
+            
+            container.innerHTML = Object.entries(heldSales).map(([holdId, items]) => {
+                const total = items.reduce((sum, item) => sum + item.total, 0);
+                return `
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                        <div>
+                            <p class="font-medium">Hold ${holdId}</p>
+                            <p class="text-xs text-gray-500">${items.length} items</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold">${total.toFixed(2)}</p>
+                            <a href="/sales/resume-sale/${holdId}" 
+                               class="text-blue-600 hover:text-blue-800 text-xs">
+                                Resume
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        })
+        .catch(error => {
+            console.error('Error loading held sales:', error);
+            container.innerHTML = '<p class="text-sm text-red-500">Error loading held sales</p>';
+        });
+}
+
+function clearAllHeldSales() {
+    if (confirm('Are you sure you want to clear all held sales?')) {
+        fetch('/sales/api/held-sales/clear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('All held sales cleared.');
+                updateHeldSalesDisplay();
+            } else {
+                alert('Error clearing held sales: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error clearing held sales:', error);
+            alert('Error clearing held sales.');
+        });
+    }
+}
+
+// Initialize
+updateCartDisplay();
+updateCheckoutButton();
+updateHeldSalesDisplay();
+loadCartFromServer(); // Load cart from server on page load
+</script>
+{% endblock %}

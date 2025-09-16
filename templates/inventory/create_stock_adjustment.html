@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Create Stock Adjustment{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">Create Stock Adjustment</h1>
+        </div>
+        
+        <form method="POST" class="px-6 py-4">
+            <div class="space-y-6">
+                <!-- Product Selection -->
+                <div>
+                    <label for="product_id" class="block text-sm font-medium text-gray-700">Product *</label>
+                    <select id="product_id" name="product_id" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Select Product</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}" data-current-stock="{{ product.stock_quantity }}">
+                            {{ product.name }} (SKU: {{ product.sku }}) - Current Stock: {{ product.stock_quantity }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Adjustment Type -->
+                <div>
+                    <label for="adjustment_type" class="block text-sm font-medium text-gray-700">Adjustment Type *</label>
+                    <select id="adjustment_type" name="adjustment_type" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Select Type</option>
+                        <option value="damage">Damage/Loss</option>
+                        <option value="return">Return/Restore</option>
+                        <option value="manual">Manual Adjustment</option>
+                    </select>
+                </div>
+                
+                <!-- Quantity -->
+                <div>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity *</label>
+                    <input type="number" id="quantity" name="quantity" step="1" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Enter quantity (use negative for damage/loss)">
+                    <p class="mt-1 text-sm text-gray-500">
+                        For damage/loss, use negative numbers. For returns/restore, use positive numbers.
+                    </p>
+                </div>
+                
+                <!-- Note -->
+                <div>
+                    <label for="note" class="block text-sm font-medium text-gray-700">Note</label>
+                    <textarea id="note" name="note" rows="3"
+                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              placeholder="Explain the reason for this adjustment..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="mt-6 flex items-center justify-end space-x-3">
+                <a href="{{ url_for('inventory.low_stock') }}" 
+                   class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Create Adjustment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const adjustmentType = document.getElementById('adjustment_type');
+    const quantity = document.getElementById('quantity');
+    
+    adjustmentType.addEventListener('change', function() {
+        if (this.value === 'damage') {
+            quantity.placeholder = 'Enter quantity (will be subtracted from stock)';
+        } else if (this.value === 'return') {
+            quantity.placeholder = 'Enter quantity (will be added to stock)';
+        } else if (this.value === 'manual') {
+            quantity.placeholder = 'Enter quantity (positive to add, negative to subtract)';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt - POS System{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white">
+    <!-- Thermal Receipt Style -->
+    <div class="receipt-container p-4 border border-gray-300 bg-white">
+        <!-- Business Header -->
+        <div class="text-center mb-4">
+            {% if business_settings and business_settings.logo_path %}
+            <div class="mb-2">
+                <img src="{{ url_for('static', filename=business_settings.logo_path) }}" 
+                     alt="Business Logo" 
+                     class="mx-auto h-16 w-auto object-contain">
+            </div>
+            {% endif %}
+            <h1 class="text-xl font-bold text-gray-900">{{ business_settings.business_name or 'POS SYSTEM' }}</h1>
+            {% if business_settings %}
+                {% if business_settings.contact_email %}
+                <p class="text-xs text-gray-600">Email: {{ business_settings.contact_email }}</p>
+                {% endif %}
+                {% if business_settings.contact %}
+                <p class="text-xs text-gray-600">Phone: {{ business_settings.contact }}</p>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+        <!-- Receipt Number and Date -->
+        <div class="border-b border-gray-300 pb-2 mb-3">
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Receipt:</span>
+                <span class="font-bold">{{ sale.receipt.receipt_number }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Date:</span>
+                <span>{{ sale.created_at.strftime('%d/%m/%Y') }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Time:</span>
+                <span>{{ sale.created_at.strftime('%H:%M') }}</span>
+            </div>
+        </div>
+        
+        <!-- Sale Information -->
+        <div class="border-b border-gray-300 pb-2 mb-3">
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Sale ID:</span>
+                <span>#{{ sale.id }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Cashier:</span>
+                <span>{{ sale.cashier.username }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Payment:</span>
+                <span>{{ sale.payment_method.replace('_', ' ').title() }}</span>
+            </div>
+        </div>
+        
+        <!-- Customer Info (if available) -->
+        {% if sale.customer %}
+        <div class="border-b border-gray-300 pb-2 mb-3">
+            <div class="text-sm font-medium mb-1">Customer:</div>
+            <div class="text-sm">{{ sale.customer.name }}</div>
+            {% if sale.customer.phone %}
+            <div class="text-sm">{{ sale.customer.phone }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Items Header -->
+        <div class="border-b border-gray-300 pb-2 mb-2">
+            <div class="grid grid-cols-12 text-xs font-bold text-gray-700">
+                <div class="col-span-6">Item</div>
+                <div class="col-span-2 text-center">Qty</div>
+                <div class="col-span-2 text-right">Price</div>
+                <div class="col-span-2 text-right">Total</div>
+            </div>
+        </div>
+        
+        <!-- Items List -->
+        <div class="mb-3">
+            {% for item in sale.items %}
+            <div class="py-1 border-b border-gray-100">
+                <div class="grid grid-cols-12 text-sm">
+                    <div class="col-span-6">
+                        <div class="font-medium">{{ item.product.name }}</div>
+                        <div class="text-xs text-gray-500">{{ item.product.sku }}</div>
+                    </div>
+                    <div class="col-span-2 text-center">{{ item.quantity }}</div>
+                    <div class="col-span-2 text-right">₵{{ "%.2f"|format(item.unit_price) }}</div>
+                    <div class="col-span-2 text-right font-medium">₵{{ "%.2f"|format(item.total_price) }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Totals -->
+        <div class="border-t-2 border-gray-400 pt-2 mb-4">
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Subtotal:</span>
+                <span>GH₵{{ "%.2f"|format(sale.total_amount + sale.discount_amount) }}</span>
+            </div>
+            {% if sale.discount_amount > 0 %}
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">Discount:</span>
+                <span class="text-red-600">-GH₵{{ "%.2f"|format(sale.discount_amount) }}</span>
+            </div>
+            {% endif %}
+            <div class="flex justify-between text-lg font-bold border-t border-gray-300 pt-2">
+                <span>TOTAL:</span>
+                <span>GH₵{{ "%.2f"|format(sale.total_amount) }}</span>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center text-sm text-gray-600 border-t border-gray-300 pt-3">
+            <p>Thank you for your purchase!</p>
+            <p class="text-xs mt-1">Receipt #{{ sale.receipt.receipt_number }}</p>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="mt-6 space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+            <a href="{{ url_for('sales.new_sale') }}" 
+               class="inline-flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-cash-register mr-2"></i>
+                New Sale
+            </a>
+            <a href="{{ url_for('sales.sales_history') }}" 
+               class="inline-flex items-center justify-center px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                <i class="fas fa-history mr-2"></i>
+                View Sales
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-3">
+            <button onclick="window.print()" 
+                    class="inline-flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <i class="fas fa-print mr-2"></i>
+                Print
+            </button>
+            <a href="{{ url_for('sales.download_receipt', sale_id=sale.id) }}" 
+               class="inline-flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <i class="fas fa-download mr-2"></i>
+                PDF
+            </a>
+            <button onclick="showEmailModal()" 
+                    class="inline-flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                <i class="fas fa-envelope mr-2"></i>
+                Email
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div id="emailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Email Receipt</h3>
+                <button onclick="hideEmailModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="emailForm" method="POST" action="{{ url_for('sales.email_receipt', sale_id=sale.id) }}">
+                <div class="mb-4">
+                    <label for="recipient_email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Recipient Email Address
+                    </label>
+                    <input type="email" 
+                           id="recipient_email" 
+                           name="recipient_email" 
+                           {% if sale.customer and sale.customer.email %}value="{{ sale.customer.email }}"{% endif %}
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Enter email address"
+                           required>
+                </div>
+                <div class="mb-4">
+                    <label for="email_message" class="block text-sm font-medium text-gray-700 mb-2">
+                        Message (Optional)
+                    </label>
+                    <textarea id="email_message" 
+                              name="email_message" 
+                              rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Add a personal message..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" 
+                            onclick="hideEmailModal()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Print Styles for Thermal Receipt -->
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .receipt-container, .receipt-container * {
+        visibility: visible;
+    }
+    
+    .receipt-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.2;
+    }
+    
+    /* Hide action buttons when printing */
+    .receipt-container + div {
+        display: none;
+    }
+    
+    /* Optimize for thermal paper width */
+    @page {
+        size: 80mm 297mm;
+        margin: 5mm;
+    }
+    
+    /* Ensure text is readable on thermal paper */
+    * {
+        color: black !important;
+        background: white !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showEmailModal() {
+    document.getElementById('emailModal').classList.remove('hidden');
+    document.getElementById('recipient_email').focus();
+}
+
+function hideEmailModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+    document.getElementById('emailForm').reset();
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.target === modal) {
+        hideEmailModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        hideEmailModal();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Receipt page loaded');
+});
+
+function downloadReceipt() {
+    window.location.href = '{{ url_for("sales.download_receipt", sale_id=sale.id) }}';
+}
+
+function sendReceiptEmail() {
+    window.location.href = '{{ url_for("sales.email_receipt", sale_id=sale.id) }}';
+}
+</script>
+{% endblock %}

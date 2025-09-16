@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Refund Sale - POS System{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-red-600 text-white px-6 py-4">
+            <h1 class="text-2xl font-bold">Refund Sale</h1>
+            <p class="text-red-100">Sale #{{ sale.id }}</p>
+        </div>
+        
+        <!-- Sale Information -->
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Sale Details</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-600">Date:</span>
+                    <span class="ml-2">{{ sale.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Total Amount:</span>
+                    <span class="ml-2">GH₵{{ "%.2f"|format(sale.total_amount) }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Payment Method:</span>
+                    <span class="ml-2">{{ sale.payment_method.replace('_', ' ').title() }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Status:</span>
+                    <span class="ml-2 px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                        {{ sale.status|title }}
+                    </span>
+                </div>
+            </div>
+            
+            {% if sale.customer %}
+            <div class="mt-3 pt-3 border-t border-gray-200">
+                <span class="font-medium text-gray-600">Customer:</span>
+                <span class="ml-2">{{ sale.customer.name }}</span>
+                {% if sale.customer.phone %}
+                <span class="ml-4 text-gray-500">({{ sale.customer.phone }})</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Items -->
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Items to Refund</h3>
+            <div class="space-y-3">
+                {% for item in sale.items %}
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div class="flex-1">
+                        <div class="font-medium">{{ item.product.name }}</div>
+                        <div class="text-sm text-gray-500">
+                            {{ "%.2f"|format(item.unit_price) }} × {{ item.quantity }}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-medium">GH₵{{ "%.2f"|format(item.total_price) }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Refund Form -->
+        <div class="p-6">
+            <form method="POST" class="space-y-4">
+                <div>
+                    <label for="refund_reason" class="block text-sm font-medium text-gray-700 mb-2">
+                        Reason for Refund *
+                    </label>
+                    <textarea id="refund_reason" name="refund_reason" rows="3" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                              placeholder="Please explain the reason for this refund..."></textarea>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-yellow-800">Important Notice</h3>
+                            <div class="mt-2 text-sm text-yellow-700">
+                                <p>• This action will restore the product stock quantities</p>
+                                <p>• The sale status will be changed to "refunded"</p>
+                                <p>• This action cannot be undone</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-3 pt-4">
+                    <a href="{{ url_for('sales.sales_history') }}" 
+                       class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-center">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        <i class="fas fa-undo mr-2"></i>
+                        Process Refund
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

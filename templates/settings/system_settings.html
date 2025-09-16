@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings - POS System{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">System Settings</h1>
+        <p class="text-gray-600 mt-2">Manage system-wide configurations and preferences</p>
+    </div>
+
+    <!-- Settings Navigation -->
+    <div class="mb-8">
+        <nav class="flex space-x-8 border-b border-gray-200">
+            <a href="{{ url_for('settings.business_profile') }}" 
+               class="py-2 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Business Profile
+            </a>
+            <a href="{{ url_for('settings.system_settings') }}" 
+               class="py-2 px-1 border-b-2 border-blue-500 text-sm font-medium text-blue-600">
+                System Settings
+            </a>
+            <a href="{{ url_for('settings.backup') }}" 
+               class="py-2 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Backup & Restore
+            </a>
+        </nav>
+    </div>
+
+    <!-- System Settings Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- General System Settings -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
+            <form method="POST" action="{{ url_for('settings.update_system_settings') }}">
+                <div class="space-y-4">
+                    <div>
+                        <label for="timezone" class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                        <select name="timezone" id="timezone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="UTC" {% if settings.timezone == 'UTC' %}selected{% endif %}>UTC</option>
+                            <option value="GMT" {% if settings.timezone == 'GMT' %}selected{% endif %}>GMT</option>
+                            <option value="EST" {% if settings.timezone == 'EST' %}selected{% endif %}>Eastern Time</option>
+                            <option value="PST" {% if settings.timezone == 'PST' %}selected{% endif %}>Pacific Time</option>
+                            <option value="Africa/Accra" {% if settings.timezone == 'Africa/Accra' %}selected{% endif %}>Africa/Accra (Ghana)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="date_format" class="block text-sm font-medium text-gray-700 mb-1">Date Format</label>
+                        <select name="date_format" id="date_format" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="DD/MM/YYYY" {% if settings.date_format == 'DD/MM/YYYY' %}selected{% endif %}>DD/MM/YYYY</option>
+                            <option value="MM/DD/YYYY" {% if settings.date_format == 'MM/DD/YYYY' %}selected{% endif %}>MM/DD/YYYY</option>
+                            <option value="YYYY-MM-DD" {% if settings.date_format == 'YYYY-MM-DD' %}selected{% endif %}>YYYY-MM-DD</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="decimal_places" class="block text-sm font-medium text-gray-700 mb-1">Decimal Places</label>
+                        <select name="decimal_places" id="decimal_places" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="2" {% if settings.decimal_places == 2 %}selected{% endif %}>2 (e.g., 10.50)</option>
+                            <option value="0" {% if settings.decimal_places == 0 %}selected{% endif %}>0 (e.g., 11)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="opening_time" class="block text-sm font-medium text-gray-700 mb-1">Business Opening Time</label>
+                        <input type="time" name="opening_time" id="opening_time" 
+                               value="{{ settings.opening_time or '09:00' }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="closing_time" class="block text-sm font-medium text-gray-700 mb-1">Business Closing Time</label>
+                        <input type="time" name="closing_time" id="closing_time" 
+                               value="{{ settings.closing_time or '17:00' }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Update General Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Security Settings</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Session Timeout</h4>
+                        <p class="text-xs text-gray-500">Automatically log out inactive users</p>
+                    </div>
+                    <div class="flex items-center">
+                        <select id="session_timeout_select" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="15" {% if settings.session_timeout == 15 %}selected{% endif %}>15 minutes</option>
+                            <option value="30" {% if settings.session_timeout == 30 %}selected{% endif %}>30 minutes</option>
+                            <option value="60" {% if settings.session_timeout == 60 %}selected{% endif %}>1 hour</option>
+                            <option value="120" {% if settings.session_timeout == 120 %}selected{% endif %}>2 hours</option>
+                            <option value="480" {% if settings.session_timeout == 480 %}selected{% endif %}>8 hours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-900 mb-3">Password Policy</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Minimum Length</label>
+                            <select id="min_password_length_select" class="w-full text-sm border border-gray-300 rounded px-2 py-1">
+                                <option value="4" {% if settings.min_password_length == 4 %}selected{% endif %}>4 characters</option>
+                                <option value="6" {% if settings.min_password_length == 6 %}selected{% endif %}>6 characters</option>
+                                <option value="8" {% if settings.min_password_length == 8 %}selected{% endif %}>8 characters</option>
+                                <option value="12" {% if settings.min_password_length == 12 %}selected{% endif %}>12 characters</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-xs">
+                                <input type="checkbox" id="require_uppercase_check" class="mr-2" {% if settings.require_uppercase %}checked{% endif %}>
+                                Require uppercase letters
+                            </label>
+                            <label class="flex items-center text-xs">
+                                <input type="checkbox" id="require_lowercase_check" class="mr-2" {% if settings.require_lowercase %}checked{% endif %}>
+                                Require lowercase letters
+                            </label>
+                            <label class="flex items-center text-xs">
+                                <input type="checkbox" id="require_numbers_check" class="mr-2" {% if settings.require_numbers %}checked{% endif %}>
+                                Require numbers
+                            </label>
+                            <label class="flex items-center text-xs">
+                                <input type="checkbox" id="require_special_chars_check" class="mr-2" {% if settings.require_special_chars %}checked{% endif %}>
+                                Require special characters
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Two-Factor Authentication</h4>
+                        <p class="text-xs text-gray-500">Enhanced security for admin accounts</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="two_factor_enabled_check" class="sr-only peer" {% if settings.two_factor_enabled %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Activity Logging</h4>
+                        <p class="text-xs text-gray-500">Track all user actions</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="activity_logging_check" class="sr-only peer" {% if settings.activity_logging %}checked{% endif %}>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <a href="{{ url_for('admin.activity_logs') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Logs</a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Notification Settings</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Low Stock Alerts</h4>
+                        <p class="text-xs text-gray-500">Get notified when products are running low</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="low_stock_alerts_check" class="sr-only peer" {% if settings.low_stock_alerts %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">Daily Sales Reports</h4>
+                        <p class="text-xs text-gray-500">Receive daily summary via email</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="daily_sales_reports_check" class="sr-only peer" {% if settings.daily_sales_reports %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900">System Maintenance</h4>
+                        <p class="text-xs text-gray-500">Notifications about system updates</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="system_maintenance_alerts_check" class="sr-only peer" {% if settings.system_maintenance_alerts %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Save All Settings -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <form id="saveAllForm" method="POST" action="{{ url_for('settings.update_system_settings') }}">
+                <div class="text-center">
+                    <button type="button" onclick="saveAllSettings()" class="bg-green-600 text-white py-3 px-8 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-lg font-medium">
+                        <i class="fas fa-save mr-2"></i>
+                        Save All Settings
+                    </button>
+                    <p class="text-sm text-gray-500 mt-2">This will save all your system settings at once</p>
+                </div>
+            </form>
+        </div>
+
+        <!-- System Information -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">System Information</h3>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">System Version:</span>
+                    <span class="font-medium">v1.0.0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Database:</span>
+                    <span class="font-medium">SQLite 3.x</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Last Backup:</span>
+                    <span class="font-medium">2 days ago</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">System Uptime:</span>
+                    <span class="font-medium">5 days, 12 hours</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Storage Used:</span>
+                    <span class="font-medium">2.3 GB / 50 GB</span>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <button class="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    <i class="fas fa-download mr-2"></i>
+                    Download System Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="mt-8 bg-white shadow rounded-lg p-6 border border-red-200">
+        <h3 class="text-lg font-medium text-red-900 mb-4">Danger Zone</h3>
+        <p class="text-sm text-red-600 mb-4">These actions cannot be undone. Please proceed with caution.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                <i class="fas fa-trash mr-2"></i>
+                Clear All Data
+            </button>
+            
+            <button class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                Reset System
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function saveAllSettings() {
+    const form = document.getElementById('saveAllForm');
+    
+    // Clear any existing hidden inputs
+    const existingHiddenInputs = form.querySelectorAll('input[type="hidden"]');
+    existingHiddenInputs.forEach(input => input.remove());
+    
+    // Get current values from General Settings form
+    const generalForm = document.querySelector('form[action="{{ url_for("settings.update_system_settings") }}"]');
+    if (generalForm) {
+        const generalInputs = generalForm.querySelectorAll('input, select');
+        generalInputs.forEach(input => {
+            if (input.name && input.value) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = input.name;
+                hiddenInput.value = input.value;
+                form.appendChild(hiddenInput);
+            }
+        });
+    }
+    
+    // Get current values from Security Settings
+    const sessionTimeout = document.getElementById('session_timeout_select');
+    if (sessionTimeout) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'session_timeout';
+        hiddenInput.value = sessionTimeout.value;
+        form.appendChild(hiddenInput);
+    }
+    
+    const passwordLength = document.getElementById('min_password_length_select');
+    if (passwordLength) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'min_password_length';
+        hiddenInput.value = passwordLength.value;
+        form.appendChild(hiddenInput);
+    }
+    
+    // Get current checkbox states
+    const checkboxes = [
+        'require_uppercase_check',
+        'require_lowercase_check', 
+        'require_numbers_check',
+        'require_special_chars_check',
+        'two_factor_enabled_check',
+        'activity_logging_check',
+        'low_stock_alerts_check',
+        'daily_sales_reports_check',
+        'system_maintenance_alerts_check'
+    ];
+    
+    checkboxes.forEach(function(checkboxId) {
+        const checkbox = document.getElementById(checkboxId);
+        if (checkbox && checkbox.checked) {
+            const fieldName = checkboxId.replace('_check', '');
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = fieldName;
+            hiddenInput.value = 'on';
+            form.appendChild(hiddenInput);
+        }
+    });
+    
+    // Submit the form
+    form.submit();
+}
+
+// Remove the old functions as they're no longer needed
+function updateHiddenField(fieldName, value) {
+    // This function is no longer needed but kept for compatibility
+}
+
+function updateHiddenCheckbox(fieldName, checked) {
+    // This function is no longer needed but kept for compatibility
+}
+</script>
+{% endblock %}
