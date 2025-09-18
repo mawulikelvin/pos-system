@@ -27,10 +27,7 @@ services:
         sync: false
       - key: MAIL_DEFAULT_SENDER
         sync: false
-  
-  - type: pserv
-    name: pos-system-db
-    env: postgresql
+ 
+databases:
+  - name: pos-system-db
     plan: free
-    databaseName: pos_system
-    user: pos_user
